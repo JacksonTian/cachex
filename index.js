@@ -17,6 +17,9 @@ module.exports = function (store, prefix, name, yieldable, expire) {
     var args = new Array(arguments.length);
     for (var i = 0; i < arguments.length; i++) {
       args[i] = arguments[i];
+      if (typeof args[i] === 'object') {
+        throw new TypeError('use object not fit cache key');
+      }
     }
     var key = prefix + ':' + name + ':' + args.join(':');
     var result = yield store.get(key);
