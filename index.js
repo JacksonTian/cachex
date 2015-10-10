@@ -25,9 +25,10 @@ module.exports = function (store, prefix, name, yieldable, expire) {
     var result = yield store.get(key);
     debug('get value for key: %s with cache, value is: %j', key, result);
     if (!result) {
-      result = yield* yieldable.apply(null, arguments);
+      result = yield yieldable.apply(null, args);
       debug('get value for key: %s with origin way', key);
       if (result) {
+        debug('save %j for key: %s with %ds', result, key, expire);
         yield store.set(key, result, expire);
       }
     }
