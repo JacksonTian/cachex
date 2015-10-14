@@ -3,15 +3,19 @@
 var debug = require('debug')('cachex');
 
 /**
- * @param {Object} store The cache store client, must have set(key, value, time)
- * and get(key) methods, the get/set must be an yieldable method
+ * The cachex will hook an method auto save data into cache and read data
+ * from cache
+ *
+ * @param {Object} store The cache store client, must have
+ * set(key, value, time), get(key) and del(key) methods,
+ * the get/set/del must be an yieldable method
  * @param {String} prefix prefix, used for key
  * @param {String} name method name, used for key
  * @param {Generator|Thunkify} yieldable must be a yieldable object
  * @param {Number} expire the expire time, in seconds
  * @return Generator the new generator, will auto process cache
  */
-module.exports = function (store, prefix, name, yieldable, expire) {
+var cachex = function (store, prefix, name, yieldable, expire) {
   return function * () {
     // copy arguments
     var args = new Array(arguments.length);
@@ -35,3 +39,17 @@ module.exports = function (store, prefix, name, yieldable, expire) {
     return result;
   };
 };
+
+/**
+ * Remove data from cache with key
+ * @param {Object} store The cache store client, must have
+ * set(key, value, time), get(key) and del(key) methods,
+ * the get/set/del must be an yieldable method
+ * @param {String} prefix prefix, used for key
+ * @param {String} key the key, used for key
+ */
+cachex.del = function * (store, prefix, key) {
+  yield store.del(prefix + ':' + key);
+};
+
+module.exports = cachex;
