@@ -15,7 +15,7 @@ var debug = require('debug')('cachex');
  * @param {Number} expire the expire time, in seconds
  * @return Generator the new generator, will auto process cache
  */
-var cachex = function (store, prefix, name, yieldable, expire) {
+module.exports = function (store, prefix, name, yieldable, expire) {
   return function * () {
     // copy arguments
     var args = new Array(arguments.length);
@@ -39,17 +39,3 @@ var cachex = function (store, prefix, name, yieldable, expire) {
     return result;
   };
 };
-
-/**
- * Remove data from cache with key
- * @param {Object} store The cache store client, must have
- * set(key, value, time), get(key) and del(key) methods,
- * the get/set/del must be an yieldable method
- * @param {String} prefix prefix, used for key
- * @param {String} key the key, used for key
- */
-cachex.del = function * (store, prefix, key) {
-  yield store.del(prefix + ':' + key);
-};
-
-module.exports = cachex;

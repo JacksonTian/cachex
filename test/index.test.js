@@ -41,15 +41,4 @@ describe('cachex', function () {
     var result = yield queryx('sql');
     expect(result).to.be('sql:from:db');
   });
-
-  it('cachex.del should ok', function* () {
-    var queryx = cachex(store, 'test', 'query', query, 1);
-    var result = yield queryx('sql');
-    expect(result).to.be('sql:from:db');
-    var result = yield queryx('sql');
-    expect(result).to.be('sql:from:cache');
-    yield cachex.del(store, 'test', 'query:sql');
-    var result = yield queryx('sql');
-    expect(result).to.be('sql:from:db');
-  });
 });
