@@ -12,14 +12,11 @@ describe('cachex', function () {
     get: function * (key) {
       return inMemory[key] ? 'sql:from:cache' : '';
     },
-    set: function * (key, value, expire) {
+    setex: function * (key, value, expire) {
       inMemory[key] = value;
       setTimeout(function () {
         delete inMemory[key];
       }, expire);
-    },
-    del: function * (key) {
-      delete inMemory[key];
     }
   };
 

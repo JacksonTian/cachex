@@ -1,6 +1,13 @@
 # cachex
 Cache Hook
 
+- [![Build Status](https://secure.travis-ci.org/JacksonTian/cachex.png)](http://travis-ci.org/JacksonTian/cachex)
+- [![NPM version](https://badge.fury.io/js/cachex.png)](http://badge.fury.io/js/cachex)
+- [![Dependencies Status](https://david-dm.org/JacksonTian/cachex.png)](https://david-dm.org/JacksonTian/cachex)
+- [![Coverage Status](https://coveralls.io/repos/JacksonTian/cachex/badge.png)](https://coveralls.io/r/JacksonTian/cachex)
+
+[![NPM](https://nodei.co/npm/cachex.png?downloads=true&stars=true)](https://nodei.co/npm/cachex)
+
 ## Installation
 
 ```sh
@@ -28,7 +35,7 @@ var store = {
   get: function * (key) {
     return inMemory[key];
   },
-  set: function * (key, value, expire) {
+  setex: function * (key, value, expire) {
     inMemory[key] = value;
     setTimeout(function () {
       delete inMemory[key];
@@ -37,7 +44,7 @@ var store = {
 };
 ```
 
-The storage object must have get/set generator method.
+The storage object must have get/setex yieldable method.
 
 db_with_cache.js
 ```

@@ -1,6 +1,6 @@
 {
   "name": "cachex",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "Cache Hook",
   "main": "index.js",
   "scripts": {
