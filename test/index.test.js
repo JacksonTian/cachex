@@ -50,7 +50,7 @@ describe('cachex', function () {
     expect(false).to.be.ok();
   });
 
-  it('cachex should throw', function* () {
+  it('cachex should ok with make', function* () {
     var queryx = cachex(store, 'test', 'query', query, 1, function (obj) {
       return obj.sql;
     });
