@@ -10,7 +10,8 @@ describe('cachex', function () {
 
   var store = {
     get: function* (key) {
-      return inMemory[key] ? 'sql:from:cache' : '';
+      return inMemory[key] ?
+        inMemory[key].replace(':from:db', ':from:cache') : null;
     },
     setex: function* (key, value, expire) {
       inMemory[key] = value;
@@ -24,22 +25,36 @@ describe('cachex', function () {
     setTimeout(callback, s * 1000);
   });
 
-  var query = function* () {
-    return 'sql:from:db';
+  var query = function* (str) {
+    return str + ':from:db';
+  };
+
+  var queryObj = function *(obj) {
+    return obj.body + ':from:db';
   };
 
   it('cachex should ok', function* () {
     var queryx = cachex(store, 'test', 'query', query, 1);
+
     var result = yield queryx('sql');
     expect(result).to.be('sql:from:db');
+    var result2 = yield queryx('sql2');
+    expect(result2).to.be('sql2:from:db');
+
     result = yield queryx('sql');
     expect(result).to.be('sql:from:cache');
+    result2 = yield queryx('sql2');
+    expect(result2).to.be('sql2:from:cache');
+
     yield sleep(1);
+
     result = yield queryx('sql');
     expect(result).to.be('sql:from:db');
+    result2 = yield queryx('sql2');
+    expect(result2).to.be('sql2:from:db');
   });
 
-  it('cachex should throw', function* () {
+  it('cachex should throw when passing objects without make', function* () {
     var queryx = cachex(store, 'test', 'query', query, 1);
     try {
       yield queryx({'sql': 'sql'});
@@ -50,49 +65,73 @@ describe('cachex', function () {
     expect(false).to.be.ok();
   });
 
-  it('cachex should ok with make', function* () {
-    var queryx = cachex(store, 'test', 'query', query, 1, function (obj) {
-      return obj.sql;
-    });
-    var result = yield queryx({sql: 'sql'});
+  it('cachex should ok when passing objects with make', function* () {
+    var obj = { body: 'sql' };
+    var obj2 = { body: 'sql2' };
+    var queryObjX = cachex(
+      store, 'test', 'queryObj', queryObj, 1,
+      function (obj) {
+        return obj.body;
+      });
+    var result = yield queryObjX(obj);
     expect(result).to.be('sql:from:db');
-    result = yield queryx({sql: 'sql'});
+    var result2 = yield queryObjX(obj2);
+    expect(result2).to.be('sql2:from:db');
+
+    result = yield queryObjX(obj);
     expect(result).to.be('sql:from:cache');
+    result2 = yield queryObjX(obj2);
+    expect(result2).to.be('sql2:from:cache');
+
     yield sleep(1);
-    result = yield queryx({sql: 'sql'});
+
+    result = yield queryObjX(obj);
     expect(result).to.be('sql:from:db');
+    result2 = yield queryObjX(obj2);
+    expect(result2).to.be('sql2:from:db');
   });
 
   it('cachex should ok with class', function* () {
-    var data = { body: 'test' };
+    var data = { body: 'data' };
     var obj = { body: 'obj' };
+    var data2 = { body: 'data2' };
+    var obj2 = { body: 'obj2' };
     class A {
       constructor(data) {
         this.data = data;
       }
 
       *query(obj) {
-        expect(this.data).to.eql(data);
-        expect(obj).to.eql(obj);
-        return 'sql:from:db' + this.data.body + obj.body;
+        return this.data.body + ':' + obj.body + ':from:db';
+      }
+
+      makeCacheKey() {
+        var args = Array.prototype.slice(arguments);
+        return this.data.body + args.join(':');
       }
     }
 
     A.prototype.queryx = cachex(
-      store, 'test', 'query', A.prototype.query, 1,
-      function(obj) {
-        expect(this.data).to.eql(data);
-        expect(obj).to.eql(obj);
-        return this.data.body + obj.body;
-      });
-    
+      store, 'test', 'query', A.prototype.query, 1, A.prototype.makeCacheKey);
+
     var a = new A(data);
+    var a2 = new A(data2);
+
     var result = yield a.queryx(obj);
-    expect(result).to.be('sql:from:db' + data.body + obj.body);
+    expect(result).to.be('data:obj:from:db');
+    var result2 = yield a2.queryx(obj2);
+    expect(result2).to.be('data2:obj2:from:db');
+
     result = yield a.queryx(obj);
-    expect(result).to.be('sql:from:cache');
+    expect(result).to.be('data:obj:from:cache');
+    result2 = yield a2.queryx(obj2);
+    expect(result2).to.be('data2:obj2:from:cache');
+
     yield sleep(1);
+
     result = yield a.queryx(obj);
-    expect(result).to.be('sql:from:db' + data.body + obj.body);
+    expect(result).to.be('data:obj:from:db');
+    result2 = yield a2.queryx(obj2);
+    expect(result2).to.be('data2:obj2:from:db');
   });
 });
