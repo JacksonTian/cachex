@@ -19,7 +19,7 @@ $ npm install cachex --save
 If you have origin SQL query, it is `db.js`:
 
 ```js
-exports.getRows = function * () {
+exports.getRows = function* () {
   // mock slow query
   var rows = yield db.query(sql);
   return rows;
@@ -32,10 +32,10 @@ Before use `cachex`, you must provider an cache storage, it can be redis or memc
 var inMemory = {};
 
 var store = {
-  get: function * (key) {
+  get: function* (key) {
     return inMemory[key];
   },
-  setex: function * (key, value, expire) {
+  setex: function* (key, value, expire) {
     inMemory[key] = value;
     setTimeout(function () {
       delete inMemory[key];
@@ -46,8 +46,8 @@ var store = {
 
 The storage object must have get/setex yieldable method.
 
-db_with_cache.js
-```
+```js
+// db_with_cache.js
 var cachex = require('cachex');
 var db = require('./db');
 
