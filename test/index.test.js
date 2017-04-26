@@ -62,4 +62,37 @@ describe('cachex', function () {
     result = yield queryx({sql: 'sql'});
     expect(result).to.be('sql:from:db');
   });
+
+  it('cachex should ok with class', function* () {
+    var data = { body: 'test' };
+    var obj = { body: 'obj' };
+    class A {
+      constructor(data) {
+        this.data = data;
+      }
+
+      *query(obj) {
+        expect(this.data).to.eql(data);
+        expect(obj).to.eql(obj);
+        return 'sql:from:db' + this.data.body + obj.body;
+      }
+    }
+
+    A.prototype.queryx = cachex(
+      store, 'test', 'query', A.prototype.query, 1,
+      function(obj) {
+        expect(this.data).to.eql(data);
+        expect(obj).to.eql(obj);
+        return this.data.body + obj.body;
+      });
+    
+    var a = new A(data);
+    var result = yield a.queryx(obj);
+    expect(result).to.be('sql:from:db' + data.body + obj.body);
+    result = yield a.queryx(obj);
+    expect(result).to.be('sql:from:cache');
+    yield sleep(1);
+    result = yield a.queryx(obj);
+    expect(result).to.be('sql:from:db' + data.body + obj.body);
+  });
 });
