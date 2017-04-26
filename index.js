@@ -27,7 +27,7 @@ module.exports = function (store, prefix, name, yieldable, expire, make) {
       }
     }
 
-    var suffix = typeof make === 'function' ? make.apply(null, args)
+    var suffix = typeof make === 'function' ? make.apply(this, args)
       : args.join(':');
 
     var key = prefix + ':' + name + ':' + suffix;
@@ -35,7 +35,7 @@ module.exports = function (store, prefix, name, yieldable, expire, make) {
     var result = yield store.get(key);
     debug('get value for key: %s with cache, value is: %j', key, result);
     if (!result) {
-      result = yield yieldable.apply(null, args);
+      result = yield yieldable.apply(this, args);
       debug('get value for key: %s with origin way', key);
       if (result) {
         debug('save %j for key: %s with %ds', result, key, expire);
