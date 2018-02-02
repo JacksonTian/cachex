@@ -4,16 +4,22 @@ var expect = require('expect.js');
 var thunkify = require('thunkify');
 var cachex = require('../');
 
+function sleep (s) {
+  return new Promise((resolve, reject) => {
+    setTimeout(resolve, s * 1000);
+  });
+}
+
 describe('cachex', function () {
 
   var inMemory = {};
 
   var store = {
-    get: function* (key) {
+    get: async function (key) {
       return inMemory[key] ?
         inMemory[key].replace(':from:db', ':from:cache') : null;
     },
-    setex: function* (key, value, expire) {
+    setex: async function (key, value, expire) {
       inMemory[key] = value;
       setTimeout(function () {
         delete inMemory[key];
@@ -21,43 +27,39 @@ describe('cachex', function () {
     }
   };
 
-  var sleep = thunkify(function (s, callback) {
-    setTimeout(callback, s * 1000);
-  });
-
-  var query = function* (str) {
+  var query = async function (str) {
     return str + ':from:db';
   };
 
-  var queryObj = function *(obj) {
+  var queryObj = async function (obj) {
     return obj.body + ':from:db';
   };
 
-  it('cachex should ok', function* () {
+  it('cachex should ok', async function () {
     var queryx = cachex(store, 'test', 'query', query, 1);
 
-    var result = yield queryx('sql');
+    var result = await queryx('sql');
     expect(result).to.be('sql:from:db');
-    var result2 = yield queryx('sql2');
+    var result2 = await queryx('sql2');
     expect(result2).to.be('sql2:from:db');
 
-    result = yield queryx('sql');
+    result = await queryx('sql');
     expect(result).to.be('sql:from:cache');
-    result2 = yield queryx('sql2');
+    result2 = await queryx('sql2');
     expect(result2).to.be('sql2:from:cache');
 
-    yield sleep(1);
+    await sleep(1);
 
-    result = yield queryx('sql');
+    result = await queryx('sql');
     expect(result).to.be('sql:from:db');
-    result2 = yield queryx('sql2');
+    result2 = await queryx('sql2');
     expect(result2).to.be('sql2:from:db');
   });
 
-  it('cachex should throw when passing objects without make', function* () {
+  it('cachex should throw when passing objects without make', async function () {
     var queryx = cachex(store, 'test', 'query', query, 1);
     try {
-      yield queryx({'sql': 'sql'});
+      await queryx({'sql': 'sql'});
     } catch (ex) {
       expect(ex.message).to.be('use object not fit cache key');
       return;
@@ -65,7 +67,7 @@ describe('cachex', function () {
     expect(false).to.be.ok();
   });
 
-  it('cachex should ok when passing objects with make', function* () {
+  it('cachex should ok when passing objects with make', async function () {
     var obj = { body: 'sql' };
     var obj2 = { body: 'sql2' };
     var queryObjX = cachex(
@@ -73,25 +75,25 @@ describe('cachex', function () {
       function (obj) {
         return obj.body;
       });
-    var result = yield queryObjX(obj);
+    var result = await queryObjX(obj);
     expect(result).to.be('sql:from:db');
-    var result2 = yield queryObjX(obj2);
+    var result2 = await queryObjX(obj2);
     expect(result2).to.be('sql2:from:db');
 
-    result = yield queryObjX(obj);
+    result = await queryObjX(obj);
     expect(result).to.be('sql:from:cache');
-    result2 = yield queryObjX(obj2);
+    result2 = await queryObjX(obj2);
     expect(result2).to.be('sql2:from:cache');
 
-    yield sleep(1);
+    await sleep(1);
 
-    result = yield queryObjX(obj);
+    result = await queryObjX(obj);
     expect(result).to.be('sql:from:db');
-    result2 = yield queryObjX(obj2);
+    result2 = await queryObjX(obj2);
     expect(result2).to.be('sql2:from:db');
   });
 
-  it('cachex should ok with class', function* () {
+  it('cachex should ok with class', async function () {
     var data = { body: 'data' };
     var obj = { body: 'obj' };
     var data2 = { body: 'data2' };
@@ -101,7 +103,7 @@ describe('cachex', function () {
         this.data = data;
       }
 
-      *query(obj) {
+      async query(obj) {
         return this.data.body + ':' + obj.body + ':from:db';
       }
 
@@ -117,21 +119,21 @@ describe('cachex', function () {
     var a = new A(data);
     var a2 = new A(data2);
 
-    var result = yield a.queryx(obj);
+    var result = await a.queryx(obj);
     expect(result).to.be('data:obj:from:db');
-    var result2 = yield a2.queryx(obj2);
+    var result2 = await a2.queryx(obj2);
     expect(result2).to.be('data2:obj2:from:db');
 
-    result = yield a.queryx(obj);
+    result = await a.queryx(obj);
     expect(result).to.be('data:obj:from:cache');
-    result2 = yield a2.queryx(obj2);
+    result2 = await a2.queryx(obj2);
     expect(result2).to.be('data2:obj2:from:cache');
 
-    yield sleep(1);
+    await sleep(1);
 
-    result = yield a.queryx(obj);
+    result = await a.queryx(obj);
     expect(result).to.be('data:obj:from:db');
-    result2 = yield a2.queryx(obj2);
+    result2 = await a2.queryx(obj2);
     expect(result2).to.be('data2:obj2:from:db');
   });
 });
