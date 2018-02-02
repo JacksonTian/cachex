@@ -21,13 +21,16 @@
   "homepage": "https://github.com/JacksonTian/cachex#readme",
   "devDependencies": {
     "coveralls": "^2.11.4",
+    "eslint": "^4.16.0",
     "expect.js": "^0.3.1",
-    "nyc": "^11.4.1",
     "mocha": "^4",
+    "nyc": "^11.4.1",
     "thunkify": "^2.1.2"
   },
   "dependencies": {
     "debug": "^2.6.4"
   },
-  "files": ["index.js"]
+  "files": [
+    "index.js"
+  ]
 }

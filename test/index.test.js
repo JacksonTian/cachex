@@ -1,11 +1,10 @@
 'use strict';
 
-var expect = require('expect.js');
-var thunkify = require('thunkify');
-var cachex = require('../');
+const expect = require('expect.js');
+const cachex = require('../');
 
 function sleep (s) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     setTimeout(resolve, s * 1000);
   });
 }
