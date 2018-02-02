@@ -1,6 +1,6 @@
 'use strict';
 
-var debug = require('debug')('cachex');
+const debug = require('debug')('cachex');
 
 /**
  * The cachex will hook an method auto save data into cache and read data
@@ -8,40 +8,39 @@ var debug = require('debug')('cachex');
  *
  * @param {Object} store The cache store client, must have
  * `setex(key, value, time)` and `get(key)` methods,
- * the get/setex must be an yieldable method
+ * the get/setex must be an async function/Promise based
  * @param {String} prefix prefix, used for key
  * @param {String} name method name, used for key
- * @param {Generator|Thunkify|Promise} yieldable must be a yieldable object
+ * @param {Promise} yieldable must be a yieldable object
  * @param {Number} expire the expire time, in seconds
  * @param {Function} make the function used to generate key
- * @return Generator the new generator, will auto process cache
+ * @return {AsyncFunction} the new async function, will auto process cache
  */
 module.exports = function (store, prefix, name, yieldable, expire, make) {
-  return function* () {
+  return async function (...args) {
     // copy arguments
-    var args = new Array(arguments.length);
-    for (var i = 0; i < arguments.length; i++) {
-      args[i] = arguments[i];
+    for (var i = 0; i < args.length; i++) {
       if (typeof args[i] === 'object' && typeof make !== 'function') {
         throw new TypeError('use object not fit cache key');
       }
     }
 
-    var suffix = typeof make === 'function' ? make.apply(this, args)
+    var suffix = typeof make === 'function' ? make.call(this, ...args)
       : args.join(':');
 
     var key = prefix + ':' + name + ':' + suffix;
 
-    var result = yield store.get(key);
+    var result = await store.get(key);
     debug('get value for key: %s with cache, value is: %j', key, result);
-    if (!result) {
-      result = yield yieldable.apply(this, args);
+    if (result === null || result === undefined) {
+      result = await yieldable.call(this, ...args);
       debug('get value for key: %s with origin way', key);
       if (result) {
         debug('save %j for key: %s with %ds', result, key, expire);
-        yield store.setex(key, result, expire);
+        await store.setex(key, result, expire);
       }
     }
+
     return result;
   };
 };
