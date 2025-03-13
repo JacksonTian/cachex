@@ -1,17 +1,17 @@
 # cachex
-Cache Hook
 
-- [![Build Status](https://secure.travis-ci.org/JacksonTian/cachex.png)](http://travis-ci.org/JacksonTian/cachex)
+A cache hook
+
+- [![Build Status](https://github.com/JacksonTian/cachex/actions/workflows/build.yml/badge.svg)](https://github.com/JacksonTian/cachex/actions/workflows/build.yml)
 - [![NPM version](https://badge.fury.io/js/cachex.png)](http://badge.fury.io/js/cachex)
-- [![Dependencies Status](https://david-dm.org/JacksonTian/cachex.png)](https://david-dm.org/JacksonTian/cachex)
-- [![Coverage Status](https://coveralls.io/repos/JacksonTian/cachex/badge.png)](https://coveralls.io/r/JacksonTian/cachex)
+- [![Coverage Status](https://codecov.io/gh/JacksonTian/cachex/branch/main/graph/badge.svg)](https://codecov.io/gh/JacksonTian/cachex)
 
 [![NPM](https://nodei.co/npm/cachex.png?downloads=true&stars=true)](https://nodei.co/npm/cachex)
 
 ## Installation
 
 ```sh
-$ npm install cachex --save
+npm i cachex --save
 ```
 
 ## Usage
@@ -69,4 +69,5 @@ db.getRows();
 ```
 
 ## License
+
 The MIT license
