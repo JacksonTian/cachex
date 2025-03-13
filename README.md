@@ -3,7 +3,7 @@
 A cache hook
 
 [![NPM version][npm-image]][npm-url]
-[![Node.js CI](https://github.com/JacksonTian/cachex/actions/workflows/node.js.yml/badge.svg)](https://github.com/JacksonTian/cachex/actions/workflows/build.yml)
+[![Node.js CI](https://github.com/JacksonTian/cachex/actions/workflows/build.yml/badge.svg)](https://github.com/JacksonTian/cachex/actions/workflows/build.yml)
 [![codecov][cov-image]][cov-url]
 [![npm download][download-image]][download-url]
 
