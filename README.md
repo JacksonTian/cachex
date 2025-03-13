@@ -2,11 +2,17 @@
 
 A cache hook
 
-- [![Build Status](https://github.com/JacksonTian/cachex/actions/workflows/build.yml/badge.svg)](https://github.com/JacksonTian/cachex/actions/workflows/build.yml)
-- [![NPM version](https://badge.fury.io/js/cachex.png)](http://badge.fury.io/js/cachex)
-- [![Coverage Status](https://codecov.io/gh/JacksonTian/cachex/branch/main/graph/badge.svg)](https://codecov.io/gh/JacksonTian/cachex)
+[![NPM version][npm-image]][npm-url]
+[![Node.js CI](https://github.com/JacksonTian/cachex/actions/workflows/node.js.yml/badge.svg)](https://github.com/JacksonTian/cachex/actions/workflows/build.yml)
+[![codecov][cov-image]][cov-url]
+[![npm download][download-image]][download-url]
 
-[![NPM](https://nodei.co/npm/cachex.png?downloads=true&stars=true)](https://nodei.co/npm/cachex)
+[npm-image]: https://img.shields.io/npm/v/cachex.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/cachex
+[cov-image]: https://codecov.io/gh/JacksonTian/cachex/branch/master/graph/badge.svg
+[cov-url]: https://codecov.io/gh/JacksonTian/cachex
+[download-image]: https://img.shields.io/npm/dm/cachex.svg?style=flat-square
+[download-url]: https://npmjs.org/package/cachex
 
 ## Installation
 
