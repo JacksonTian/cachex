@@ -25,11 +25,10 @@ npm i cachex --save
 If you have origin SQL query, it is `db.js`:
 
 ```js
-exports.getRows = async function () {
-  // mock slow query
-  var rows = await db.query(sql);
-  return rows;
-};
+async function getRows() {
+  // mock a slow query
+  return await db.query(sql);
+}
 ```
 
 Before use `cachex`, you must provider an cache storage, it can be redis or memcached or memory.
@@ -50,28 +49,29 @@ var store = {
 };
 ```
 
-The storage object must have get/setex yieldable method.
+The storage object must have get/setex method.
 
 ```js
 // db_with_cache.js
-var cachex = require('cachex');
-var db = require('./db');
+import cachex from 'cachex';
+import db from './db.js';
 
 // cache result 10s
-export.getRows = cachex(store, 'db', 'getRows', db.getRows, 10);
+export const getRows = cachex(store, 'db', 'getRows', db.getRows, 10);
 ```
 
 Running go:
 
 ```js
-var db = require('./db_with_cache');
+import dbx from './db_with_cache.js';
 // from db
-db.getRows();
+await dbx.getRows();
+
 // from cache
-db.getRows();
+await dbx.getRows();
 // ..10s..pass..
 // from db
-db.getRows();
+await dbx.getRows();
 ```
 
 ## License
