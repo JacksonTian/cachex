@@ -4,8 +4,11 @@
   "description": "Cache Hook",
   "main": "index.js",
   "scripts": {
-    "test": "make test"
+    "test": "mocha -R spec --timeout 3000 test/*.test.js",
+    "cov": "c8 -r=lcov -r=html -r=text -r=json npm run test",
+    "lint": "eslint --fix index.js test/*.test.js"
   },
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git://github.com/JacksonTian/cachex.git"
@@ -20,17 +23,17 @@
   },
   "homepage": "https://github.com/JacksonTian/cachex#readme",
   "devDependencies": {
-    "coveralls": "^2.11.4",
-    "eslint": "^4.16.0",
-    "expect.js": "^0.3.1",
-    "mocha": "^4",
-    "nyc": "^11.4.1",
-    "thunkify": "^2.1.2"
+    "eslint": "^9",
+    "mocha": "^11",
+    "c8": "^10"
   },
   "dependencies": {
-    "debug": "^2.6.9"
+    "debug": "^4.4.0"
   },
   "files": [
     "index.js"
-  ]
+  ],
+  "engines": {
+    "node": ">=14"
+  }
 }

@@ -1,9 +1,9 @@
-'use strict';
+import Debugger from 'debug';
 
-const debug = require('debug')('cachex');
+const debug = Debugger('cachex');
 
 /**
- * The cachex will hook an method auto save data into cache and read data
+ * The cachex will hook a method auto save data into cache and read data
  * from cache
  *
  * @param {Object} store The cache store client, must have
@@ -11,12 +11,12 @@ const debug = require('debug')('cachex');
  * the get/setex must be an async function/Promise based
  * @param {String} prefix prefix, used for key
  * @param {String} name method name, used for key
- * @param {Promise} yieldable must be a yieldable object
+ * @param {Promise} callable must be a callable object
  * @param {Number} expire the expire time, in seconds
  * @param {Function} make the function used to generate key
  * @return {AsyncFunction} the new async function, will auto process cache
  */
-module.exports = function (store, prefix, name, yieldable, expire, make) {
+export default function (store, prefix, name, callable, expire, make) {
   return async function (...args) {
     // copy arguments
     for (var i = 0; i < args.length; i++) {
@@ -25,15 +25,15 @@ module.exports = function (store, prefix, name, yieldable, expire, make) {
       }
     }
 
-    var suffix = typeof make === 'function' ? make.call(this, ...args)
+    const suffix = typeof make === 'function' ? make.call(this, ...args)
       : args.join(':');
 
-    var key = prefix + ':' + name + ':' + suffix;
+    const key = `${prefix}:${name}:${suffix}`;
 
-    var result = await store.get(key);
+    let result = await store.get(key);
     debug('get value for key: %s with cache, value is: %j', key, result);
     if (result === null || result === undefined) {
-      result = await yieldable.call(this, ...args);
+      result = await callable.call(this, ...args);
       debug('get value for key: %s with origin way', key);
       if (result) {
         debug('save %j for key: %s with %ds', result, key, expire);
@@ -43,4 +43,4 @@ module.exports = function (store, prefix, name, yieldable, expire, make) {
 
     return result;
   };
-};
+}
