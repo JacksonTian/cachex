@@ -14,6 +14,13 @@ A cache hook
 [download-image]: https://img.shields.io/npm/dm/cachex.svg?style=flat-square
 [download-url]: https://npmjs.org/package/cachex
 
+Features:
+
+- No need to modify any existing code
+- Auto generate cache key
+- Auto serialize and deserialize data
+- Built-in cache penetration solution
+
 ## Installation
 
 ```sh
@@ -31,7 +38,7 @@ async function getRows() {
 }
 ```
 
-Before use `cachex`, you must provider an cache storage, it can be redis or memcached or memory.
+Before use `cachex`, you must provide a cache storage, it can be redis or memcached or memory.
 
 ```js
 var inMemory = {};
@@ -72,6 +79,30 @@ await dbx.getRows();
 // ..10s..pass..
 // from db
 await dbx.getRows();
+```
+
+### Use with Redis
+
+```js
+import { createClient } from 'redis';
+
+const redis = createClient({
+  // redis connection options
+});
+await redis.connect();
+
+// cachex will auto serialize/deserialize
+const store = {
+  get: async function (key) {
+    return await redis.GET(key);
+  },
+  setex: async function (key, value, expire) {
+    await redis.SETEX(key, expire, value);
+  }
+};
+
+// cache result 10s
+export const getRows = cachex(store, 'db', 'getRows', db.getRows, 10);
 ```
 
 ## License

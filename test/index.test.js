@@ -10,20 +10,21 @@ function sleep (s) {
 
 describe('cachex', function () {
 
-  var inMemory = {};
-
-  var store = {
-    get: async function (key) {
-      return inMemory[key] ?
-        inMemory[key].replace(':from:db', ':from:cache') : null;
-    },
-    setex: async function (key, value, expire) {
-      inMemory[key] = value;
-      setTimeout(function () {
-        delete inMemory[key];
+  class Store {
+    constructor () {
+      this.inMemory = {};
+    }
+    async get (key) {
+      return this.inMemory[key] ?
+        this.inMemory[key].replace(':from:db', ':from:cache') : null;
+    }
+    setex (key, value, expire) {
+      this.inMemory[key] = value;
+      setTimeout(() => {
+        delete this.inMemory[key];
       }, expire);
     }
-  };
+  }
 
   var query = async function (str) {
     return str + ':from:db';
@@ -33,7 +34,12 @@ describe('cachex', function () {
     return obj.body + ':from:db';
   };
 
+  var queryNull = async function () {
+    return null;
+  };
+
   it('cachex should ok', async function () {
+    const store = new Store();
     var queryx = cachex(store, 'test', 'query', query, 1);
 
     var result = await queryx('sql');
@@ -54,7 +60,21 @@ describe('cachex', function () {
     assert.strictEqual(result2, 'sql2:from:db');
   });
 
+  it('cachex penetration should ok', async function () {
+    const store = new Store();
+    var queryx = cachex(store, 'test', 'query', queryNull, 2);
+
+    var result = await queryx('sql');
+    assert.strictEqual(result, null);
+    var result2 = await queryx('sql');
+    assert.strictEqual(result2, null);
+    await sleep(1);
+    var result3 = await queryx('sql');
+    assert.strictEqual(result3, null);
+  });
+
   it('cachex should throw when passing objects without make', async function () {
+    const store = new Store();
     var queryx = cachex(store, 'test', 'query', query, 1);
     try {
       await queryx({'sql': 'sql'});
@@ -65,6 +85,7 @@ describe('cachex', function () {
   });
 
   it('cachex should ok when passing objects with make', async function () {
+    const store = new Store();
     var obj = { body: 'sql' };
     var obj2 = { body: 'sql2' };
     var queryObjX = cachex(
@@ -91,6 +112,7 @@ describe('cachex', function () {
   });
 
   it('cachex should ok with class', async function () {
+    const store = new Store();
     var data = { body: 'data' };
     var obj = { body: 'obj' };
     var data2 = { body: 'data2' };

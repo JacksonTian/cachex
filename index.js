@@ -2,6 +2,8 @@ import Debugger from 'debug';
 
 const debug = Debugger('cachex');
 
+const NULL = '#NULL#';
+
 /**
  * The cachex will hook a method auto save data into cache and read data
  * from cache
@@ -31,16 +33,26 @@ export default function (store, prefix, name, callable, expire, make) {
     const key = `${prefix}:${name}:${suffix}`;
 
     let result = await store.get(key);
-    debug('get value for key: %s with cache, value is: %j', key, result);
-    if (result === null || result === undefined) {
-      result = await callable.call(this, ...args);
-      debug('get value for key: %s with origin way', key);
-      if (result) {
-        debug('save %j for key: %s with %ds', result, key, expire);
-        await store.setex(key, result, expire);
-      }
+    if (result === NULL) {
+      debug('get value for key: %s with cache, but it is null. it a cache penetration case', key);
+      return null;
     }
 
+    debug('get value for key: %s with cache, value is: %j', key, result);
+    if (result !== null && result !== undefined) {
+      return JSON.parse(result);
+    }
+
+    result = await callable.call(this, ...args);
+    debug('get value for key: %s with origin way', key);
+    if (result !== null && result !== undefined) {
+      debug('save %j for key: %s with %ds', result, key, expire);
+      await store.setex(key, JSON.stringify(result), expire);
+      return result;
+    }
+
+    // null caching
+    await store.setex(key, NULL, 1);
     return result;
   };
 }
